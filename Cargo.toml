@@ -1,34 +1,40 @@
 [package]
+rust-version = "1.93"
+
 name = "serde_json"
 version = "1.0.149"
-authors = ["Erick Tryzelaar <erick.tryzelaar@gmail.com>", "David Tolnay <dtolnay@gmail.com>"]
+authors = [
+    "Erick Tryzelaar <erick.tryzelaar@gmail.com>",
+    "David Tolnay <dtolnay@gmail.com>",
+]
 categories = ["encoding", "parser-implementations", "no-std"]
 description = "A JSON serialization file format"
 documentation = "https://docs.rs/serde_json"
-edition = "2021"
+edition = "2024"
 keywords = ["json", "serde", "serialization"]
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/serde-rs/json"
-rust-version = "1.68"
+repository = "https://github.com/IvanSenDN/serde_json"
 
 [dependencies]
 indexmap = { version = "2.2.3", optional = true }
 itoa = "1.0"
 memchr = { version = "2", default-features = false }
-serde_core = { version = "1.0.220", default-features = false }
+serde_core = { git = "https://github.com/IvanSenDN/serde", package = "serde_core", default-features = false }
 zmij = "1.0"
 
 [target.'cfg(any())'.dependencies]
-serde = { version = "1.0.220", default-features = false }
+serde = { git = "https://github.com/IvanSenDN/serde", package = "serde", default-features = false }
 
 [dev-dependencies]
 automod = "1.0.11"
 indoc = "2.0.2"
 ref-cast = "1.0.18"
 rustversion = "1.0.13"
-serde = { version = "1.0.194", features = ["derive"] }
+serde = { git = "https://github.com/IvanSenDN/serde", package = "serde", features = [
+    "derive",
+] }
 serde_bytes = "0.11.10"
-serde_derive = "1.0.166"
+serde_derive = { git = "https://github.com/IvanSenDN/serde", package = "serde_derive" }
 serde_stacker = "0.1.8"
 trybuild = { version = "1.0.108", features = ["diff"] }
 
@@ -93,3 +99,7 @@ raw_value = []
 # overflow the stack after deserialization has completed, including, but not
 # limited to, Display and Debug and Drop impls.
 unbounded_depth = []
+
+# Support for custom allocators via nightly allocator_api feature.
+# Enables from_str_in, from_slice_in functions for arena allocation.
+allocator_api = ["serde_core/allocator_api"]

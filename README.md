@@ -1,18 +1,67 @@
-# Serde JSON &emsp; [![Build Status]][actions] [![Latest Version]][crates.io]
+# Serde JSON (allocator_api fork)
 
-[Build Status]: https://img.shields.io/github/actions/workflow/status/serde-rs/json/ci.yml?branch=master
-[actions]: https://github.com/serde-rs/json/actions?query=branch%3Amaster
-[Latest Version]: https://img.shields.io/crates/v/serde_json.svg
-[crates.io]: https://crates.io/crates/serde\_json
+**Fork of [serde-rs/json](https://github.com/serde-rs/json) with support for custom allocators via Rust nightly `allocator_api`.**
 
-**Serde is a framework for *ser*ializing and *de*serializing Rust data structures efficiently and generically.**
+Adds `from_str_in`, `from_slice_in`, `from_reader_in` — deserialize JSON into arena (e.g. [bumpalo](https://github.com/fitzgen/bumpalo)). Use together with [IvanSenDN/serde](https://github.com/IvanSenDN/serde) (fork with `DeserializeIn` and `#[derive(DeserializeIn)]`).
 
 ---
 
+## Requirements
+
+- **Rust 1.93** or newer.
+- **Nightly** and `#![feature(allocator_api)]` for the allocator API.
+
+---
+
+## Usage
+
+### Standard (stable)
+
+Same API as upstream. Use this fork via git:
+
 ```toml
 [dependencies]
-serde_json = "1.0"
+serde = { git = "https://github.com/IvanSenDN/serde", features = ["derive"] }
+serde_json = { git = "https://github.com/IvanSenDN/serde_json" }
 ```
+
+### With allocator_api (nightly)
+
+```toml
+[dependencies]
+serde = { git = "https://github.com/IvanSenDN/serde", features = ["derive", "allocator_api"] }
+serde_json = { git = "https://github.com/IvanSenDN/serde_json", features = ["allocator_api"] }
+bumpalo = { version = "3", features = ["allocator_api", "collections"] }
+```
+
+```rust
+#![feature(allocator_api)]
+
+use bumpalo::Bump;
+use serde::DeserializeIn;
+
+#[derive(DeserializeIn)]
+struct Person<A: std::alloc::Allocator> {
+    name: String<A>,  // your arena string type
+    age: u8,
+}
+
+fn main() {
+    let bump = Bump::new();
+    let json = r#"{"name": "Alice", "age": 30}"#;
+    let person: Person<&Bump> = serde_json::from_str_in(json, &bump).unwrap();
+}
+```
+
+**API:** `from_str_in`, `from_slice_in`, `from_reader_in` — same as `from_str` / `from_slice` / `from_reader`, but take an allocator and require `T: DeserializeIn<'de, A>`.
+
+---
+
+## Note
+
+Personal-use fork. Development only as needed. Not published to crates.io.
+
+---
 
 You may be looking for:
 
@@ -20,7 +69,6 @@ You may be looking for:
 - [Serde API documentation](https://docs.rs/serde)
 - [Detailed documentation about Serde](https://serde.rs/)
 - [Setting up `#[derive(Serialize, Deserialize)]`](https://serde.rs/derive.html)
-- [Release notes](https://github.com/serde-rs/json/releases)
 
 JSON is a ubiquitous open-standard format that uses human-readable text to
 transmit data objects consisting of key-value pairs.
