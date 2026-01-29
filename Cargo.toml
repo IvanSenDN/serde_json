@@ -13,7 +13,7 @@ documentation = "https://docs.rs/serde_json"
 edition = "2024"
 keywords = ["json", "serde", "serialization"]
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/IvanSenDN/serde_json"
+repository = "https://github.com/serde-rs/json"
 
 [dependencies]
 indexmap = { version = "2.2.3", optional = true }

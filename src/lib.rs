@@ -367,6 +367,7 @@
 #![deny(missing_docs)]
 #![no_std]
 #![cfg_attr(docsrs, feature(doc_cfg))]
+#![cfg_attr(feature = "allocator_api", feature(allocator_api))]
 #![allow(unknown_lints, mismatched_lifetime_syntaxes)]
 
 #[cfg(not(any(feature = "std", feature = "alloc")))]
@@ -392,8 +393,16 @@ pub mod __private {
 #[cfg_attr(docsrs, doc(cfg(feature = "std")))]
 #[doc(inline)]
 pub use crate::de::from_reader;
+#[cfg(all(feature = "std", feature = "allocator_api"))]
+#[cfg_attr(docsrs, doc(cfg(all(feature = "std", feature = "allocator_api"))))]
+#[doc(inline)]
+pub use crate::de::from_reader_in;
 #[doc(inline)]
 pub use crate::de::{from_slice, from_str, Deserializer, StreamDeserializer};
+#[cfg(feature = "allocator_api")]
+#[cfg_attr(docsrs, doc(cfg(feature = "allocator_api")))]
+#[doc(inline)]
+pub use crate::de::{from_slice_in, from_str_in};
 #[doc(inline)]
 pub use crate::error::{Error, Result};
 #[doc(inline)]

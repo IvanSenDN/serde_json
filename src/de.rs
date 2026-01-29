@@ -2702,3 +2702,67 @@ where
 {
     from_trait(read::StrRead::new(s))
 }
+
+/// Deserialize an instance of type `T` from a string of JSON text using a custom allocator.
+///
+/// This is similar to [`from_str`], but uses the provided allocator for all
+/// allocations during deserialization. The type `T` must implement [`DeserializeIn<A>`]
+/// where `A` is the allocator type.
+///
+/// # Example
+///
+/// ```ignore
+/// use serde_json;
+/// use bumpalo::Bump;
+///
+/// #[derive(DeserializeIn)]
+/// struct Person<A: Allocator> {
+///     name: String<A>,
+///     age: u8,
+/// }
+///
+/// let bump = Bump::new();
+/// let data = r#"{"name": "John", "age": 30}"#;
+/// let person: Person<&Bump> = serde_json::from_str_in(data, &bump)?;
+/// ```
+#[cfg(feature = "allocator_api")]
+#[cfg_attr(docsrs, doc(cfg(feature = "allocator_api")))]
+pub fn from_str_in<'a, T, A>(s: &'a str, alloc: A) -> Result<T>
+where
+    T: de::DeserializeIn<'a, A>,
+    A: core::alloc::Allocator + Copy,
+{
+    let mut deserializer = Deserializer::from_str(s);
+    T::deserialize_in(&mut deserializer, alloc)
+}
+
+/// Deserialize an instance of type `T` from bytes of JSON text using a custom allocator.
+///
+/// This is similar to [`from_slice`], but uses the provided allocator for all
+/// allocations during deserialization.
+#[cfg(feature = "allocator_api")]
+#[cfg_attr(docsrs, doc(cfg(feature = "allocator_api")))]
+pub fn from_slice_in<'a, T, A>(v: &'a [u8], alloc: A) -> Result<T>
+where
+    T: de::DeserializeIn<'a, A>,
+    A: core::alloc::Allocator + Copy,
+{
+    let mut deserializer = Deserializer::from_slice(v);
+    T::deserialize_in(&mut deserializer, alloc)
+}
+
+/// Deserialize an instance of type `T` from an I/O stream of JSON using a custom allocator.
+///
+/// This is similar to [`from_reader`], but uses the provided allocator for all
+/// allocations during deserialization.
+#[cfg(all(feature = "std", feature = "allocator_api"))]
+#[cfg_attr(docsrs, doc(cfg(all(feature = "std", feature = "allocator_api"))))]
+pub fn from_reader_in<R, T, A>(rdr: R, alloc: A) -> Result<T>
+where
+    R: crate::io::Read,
+    T: for<'de> de::DeserializeIn<'de, A>,
+    A: core::alloc::Allocator + Copy,
+{
+    let mut deserializer = Deserializer::from_reader(rdr);
+    T::deserialize_in(&mut deserializer, alloc)
+}
